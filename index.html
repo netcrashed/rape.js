@@ -1,0 +1,26 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>rape.js</title>	
+</head>
+<body>
+<script src="rape.min.js"></script>
+<script>
+function rape(file){
+new Rape(file).info().then(res=>{console.log(res);}).catch((e)=>{console.log('fail');});
+};
+</script>
+<b>new Rape ( Image )</b><br />
+//github.com/netcrashed/rape.js<br />
+<br />
+Blob<br />
+<input type="file" onchange="rape(this.files[0]);" /><br />
+<br />
+ObjectUrl<br />
+<input type="file" onchange="rape(window.URL.createObjectURL(this.files[0]));" /><br />
+<br />
+DataURL<br />
+<a href="javascript:;" onclick="rape('data:ThisIsA/shit;base64,UklGRvoDAABXRUJQVlA4TO0DAAAvx8AYAOfBJpKsSi2GPyh4qhBBRkR6Rs6qgjaS4lzF3AsogFEbSY56uXTPYzQIZhlcZnF0jsxROAQ5gJn/AEmEsCPglhOT7zdCIuCWEw4zALKfBCAtGxIBNxikAOicYkmEAZgUgGQA3SqGRQEYJFvRghJ4WRUBlxkESn7QH7PMYZDkg0CQLUmyalXruMMR3G3hLvvse/b8/4fBnu5ZzLo8QkT/IUhg27YBsuVLAVAr6g/k73/+SsF/Nx8GKRYlrx/yw3E5DyFMsZLq8FNJY49IOfiUMtEvXo4GJk7ugcySCBtvn75Z/FaXCyRtuHVyJ85czcJXWhdASD0rmuljTUkPiDCy8yEpwib3zO+yb5DWPnN8BXzs86xCaD4AKdUBDGjZN6NxkRANf6HKlsELg5Eez4pkSsQZqsyQIIx0tsKsbc0PoMQoK+1lStyCQKPZutaeIAz3rMeQ2007QTVa9kkeRBuOp8EvGd0LRuPstc7ry7l2AnqbFt/aqnExQLd9NxRU9qOhbLSvRF5TzkjTFykP+JNBfHlI3HqQN0SAxoVRmgt0BXSVjOKfvJ9oA7oygAbSVZwgj8BJgnhduZ54kQw6VfPuDDshyrxQfAuWfS3Yh2Tl0kbXD7ATEogvEt/oYeOH1QyX6LFe8qgrbxDmhUi6kqTB6UKD31i3UKCy8a2GDx4D05LnG3mEXlazuoW6l6lBl4gLysOAn4l4g3/HS0iddW76r+A8iPXG6TXhndBsGluKm2BB35M06A3M1A943IF+HIE/2mLf7kwlWVj7QtJQqt1G48IPuNBRW3jUAgw7cXM8ZMwZ2JjciVhw96p4tdAKe453OPAqMM/XO8SUqEqIxy6M3O4NsMr3BKr0Cqy7QAFv8XjQbF98A3w/EzjyQPVBjzC0GKwbwqGXbIFN9LeM3XvxJSg1Go1ghBp+qLqsWy9zejP3+R33MxQ99ODsqGdMQ4vj/pSoNQDMQK4EtQaDEWiZGtLwgkTyRBe/u9c3yYL6R8IU7h50w/sB8S3ihqKOhE1uBoR2ek/1r4VamrdfkeLpyw3L/v+Bom5nA5pSc80xN+oMIDdTAHfYONGCF/ef7U11YMgKH9HhFi9oY9kDz7/71HIIbHWPLqgiLUS+KExZGU6esPWwc81Jz83OX8Hm87DPDeQLMAihpwKA7H1jsHM/XRh4zhjVgSErmOkUS0yIR3fhxwRh4LA1Y0g0ZIUyJS0JR9s6jgRhjV2gPWOAokNLoKBsylvNDMkwfdWBURX54ZMx9CHfPpRSWV2Wc0M2THN1aJA0PLMtY1PJki+H4H9ygM+LwcC0ia9ebcT6mCKTy3IxGJ7J3//8hYkA');">WEBP</a><br />
+</body>
+</html>
