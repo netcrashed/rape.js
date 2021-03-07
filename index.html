@@ -3,12 +3,20 @@
 <head>
 <meta charset="utf-8" />
 <title>rape.js</title>	
+<style>
+</style>
 </head>
 <body>
-<script src="rape.min.js"></script>
+<script src="rape.js"></script>
 <script>
 function rape(file){
-new Rape(file).conv().then(res=>{console.log(res);document.getElementById('test').src=res;}).catch((e)=>{console.log('fail');});
+let conf={
+'jpg':{width:1000,height:500,output:'DataURL',fill:null,format:'image/jpeg',quality:0.8},
+'bmp':{width:1000,height:500,output:'DataURL',fill:null,format:'image/jpeg',quality:0.8},
+'png':{width:1000,height:500,output:'DataURL',fill:null,format:'image/jpeg',quality:0.8},
+'webp':{width:1000,height:500,output:'DataURL',fill:null,format:'image/jpeg',quality:0.8},
+}
+new Rape(file,conf).conv().then(res=>{console.log(res);document.getElementById('test').src=res.zygote;}).catch((e)=>{console.log('fail');});
 };
 </script>
 <b>new Rape ( Image )</b><br />
