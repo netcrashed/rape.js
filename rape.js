@@ -86,39 +86,34 @@ else{return resolve();};
 };
 async init(){
 if(!this.canvas){return Promise.reject('init:canvas');};
-let read=null;
-read=await this.read(0,21);
-if(read.slice(0,16)=='89504e470d0a1a0a'){this.format='png';}
-else if(read.slice(0,6)=='ffd8ff'){this.format='jpg';}
-else if(read.slice(0,4)=='424d'){this.format='bmp';}
-else if(read.slice(0,8)=='00000100'){this.format='ico';this.detail='ico';}
-else if(read.slice(0,8)=='00000200'){this.format='ico';this.detail='cur';}
-else if(read.slice(0,12)=='474946383761'){this.format='gif';this.detail='gif87';}
-else if(read.slice(0,12)=='474946383961'){this.format='gif';this.detail='gif89';}
-else if(read.slice(0,8)=='52494646'&&read.slice(16,24)=='57454250'){this.format='webp';if(read.slice(24,32)=='56503858'&&parseInt(read.slice(40,42),16).toString(2).slice(-2,-1)==1){this.animate=true;};}
+let head=await this.read(0,41);
+if(head.slice(0,16)=='89504e470d0a1a0a'){this.format='png';if(head.slice(74,82)=='6163544c'){this.animate=true;};}
+else if(head.slice(0,6)=='ffd8ff'){this.format='jpg';}
+else if(head.slice(0,4)=='424d'){this.format='bmp';}
+else if(head.slice(0,8)=='00000100'){this.format='ico';}
+else if(head.slice(0,8)=='00000200'){this.format='ico';this.detail='cur';}
+else if(head.slice(0,12)=='474946383761'){this.format='gif';this.detail='gif87';}
+else if(head.slice(0,12)=='474946383961'){this.format='gif';this.detail='gif89';}
+else if(head.slice(0,8)=='52494646'&&head.slice(16,24)=='57454250'){this.format='webp';if(head.slice(24,32)=='56503858'&&parseInt(head.slice(40,42),16).toString(2).slice(-2,-1)==1){this.animate=true;};}
 else{return Promise.reject('init:format');};
 if(this.format=='jpg'){
-let skip=false;switch(read.slice(4,8)){case 'ffe0':skip=parseInt(read.slice(8,12),16)+8;break;case 'ffe1':skip=6;break;};
+let skip=0;switch(head.slice(4,8)){case 'ffe0':skip=parseInt(head.slice(8,12),16)+8;break;case 'ffe1':skip=6;break;};
 if(skip){
-read=await this.read(skip,skip+14);
-if(read.slice(0,8)=='45786966'){
-let lend=(read.slice(12,16)=='4949');
-skip+=parseInt(this.code(read.slice(20,28),lend),16)+6;
-read=await this.read(skip,skip+2);
-let loop=parseInt(this.code(read,lend),16);
-skip+=2;
-read=await this.read(skip,skip+loop*12);
-for(let i=0;i<loop;i++){if(['0112','1201'].indexOf(read.slice(i*24,i*24+4))>=0){this.rotate=parseInt(this.code(read.slice(i*24+16,i*24+20),lend),16);break;};};
+let chip=((skip*2+28)>head.length)?await this.read(skip,skip+14):head.slice(skip*2,skip*2+28);
+if(chip.slice(0,8)=='45786966'){
+let lend=(chip.slice(12,16)=='4949');skip+=parseInt(this.code(chip.slice(20,28),lend),16)+6;
+chip=((skip*2+4)>head.length)?await this.read(skip,skip+2):head.slice(skip*2,skip*2+4);
+let loop=parseInt(this.code(chip,lend),16);skip+=2;
+chip=await this.read(skip,skip+loop*12);
+for(let i=0;i<loop;i++){if(['0112','1201'].indexOf(chip.slice(i*24,i*24+4))>=0){this.rotate=parseInt(this.code(chip.slice(i*24+16,i*24+20),lend),16);break;};};
 };
 };
 };
 if(this.format=='gif'&&this.detail=='gif89'){
-let from=0;
-let find=0;
+let from=0,find=0;
 while(from>=0&&find<2){
-read=await this.read(from,from+102420);
-if(from+102420>=this.length){from=-1;}else{from+=102400;}
-find+=(read.match(/21f904.{8}00(2c|21)/g)||[]).length;
+find+=((await this.read(from,from+102420)).match(/21f904.{8}00(2c|21)/g)||[]).length;
+if(from+102420>=this.length){from=-1;}else{from+=102400;};
 };
 if(find>=2){this.animate=true;};
 };
