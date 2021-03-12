@@ -100,7 +100,7 @@ return new Promise((done,fail)=>{
 let img=new Image();
 img.src=(typeof(this.canvas)=='object')?URL.createObjectURL(this.canvas):this.canvas;
 img.onload=()=>{
-this.autofix=(typeof(img.style['image-orientation'])=='undefined')?false:(['','from-image'].indexOf(img.style['image-orientation'])>=0);
+let fix=(typeof(img.style['image-orientation'])=='undefined')?true:(['','from-image'].indexOf(img.style['image-orientation'])<0);
 let cfg=this.config[this.format].normal?this.config[this.config[this.format].normal]:{};
 if(cfg.format=='image/webp'&&this.config[this.format].nowebp){
 let cvs=document.createElement('canvas');cvs.getContext('2d');
@@ -108,7 +108,7 @@ if(cvs.toDataURL('image/webp').indexOf('data:image/webp')!=0){cfg=this.config[th
 };
 if(typeof(this.canvas)=='object'){URL.revokeObjectURL(img.src);};
 let width=img.width,height=img.height,ratio=width/height,topple=false;
-if(!this.autofix&&(this.rotate==6||this.rotate==8)){
+if(fix&&(this.rotate==6||this.rotate==8)){
 width=img.height;height=img.width;ratio=width/height;topple=true;
 };
 if(cfg.width&&width>cfg.width&&cfg.height&&height>cfg.height){
@@ -121,7 +121,7 @@ this.canvas=document.createElement('canvas');
 this.canvas.width=width;
 this.canvas.height=height;
 let ctx=this.canvas.getContext('2d');
-if(!this.autofix){
+if(fix){
 switch(this.rotate){
 case 3:ctx.translate(width,height);ctx.rotate(Math.PI);break;
 case 6:ctx.translate(width,0);ctx.rotate(Math.PI/2);break;
