@@ -1,7 +1,7 @@
 //github.com/netcrashed/rape.js
 class Rape{
 constructor(file,conf){
-this._='20210312';
+this._='20210313';
 this.canvas=file||null;
 this.config=conf||{};
 console.log('//github.com/netcrashed/rape.js?'+this._);
@@ -12,55 +12,80 @@ else if(exec){let temp='';while(part.length>2){temp+=part.slice(-2);part=part.sl
 else{return part;};
 };
 read(from,till){
-return new Promise((done,fail)=>{
-if(!this.canvas){fail('read:canvas');}
-else if(typeof(this.canvas)=='object'){
+return new Promise((resolve,reject)=>{
+if(typeof(this.canvas)=='object'){
 this.length=this.canvas.size;
-if(this.length<60){fail('read:length');};
+if(this.length<60){return reject('read:length');};
 if(!from||from<0){from=from?(this.length+from):0;};
 if(!till||till<0){till=this.length+(till||0);};
 if(till>this.length){till=this.length;};
 this.reader=this.reader||new FileReader();
 this.reader.readAsArrayBuffer(this.canvas.slice(from,till));
-this.reader.onerror=()=>{fail('read:error');};
-this.reader.onload=()=>{done(this.code(this.reader.result));};
+this.reader.onerror=()=>{return reject('read:error');};
+this.reader.onload=()=>{return resolve(this.code(this.reader.result));};
 }
 else if(typeof(this.canvas)=='string'&&this.canvas.slice(0,4)=='blob'){
 if(this.reader){
 if(!from||from<0){from=from?(this.length+from):0;};
 if(!till||till<0){till=this.length+(till||0);};
 if(till>this.length){till=this.length;};
-done(this.code(this.reader.response.slice(from,till)));
+return resolve(this.code(this.reader.response.slice(from,till)));
 }
 else{
 this.reader=new XMLHttpRequest;
 this.reader.responseType='arraybuffer';
-this.reader.onerror=()=>{fail('read:error');};
+this.reader.onerror=()=>{return reject('read:error');};
 this.reader.onload=()=>{
 this.length=this.reader.response.byteLength;
-if(this.length<60){fail('read:length');};
+if(this.length<60){return reject('read:length');};
 if(!from||from<0){from=from?(this.length+from):0;};
 if(!till||till<0){till=this.length+(till||0);};
 if(till>this.length){till=this.length;};
-done(this.code(this.reader.response.slice(from,till)));
+return resolve(this.code(this.reader.response.slice(from,till)));
 };
 this.reader.open('GET',this.canvas);
 this.reader.send(null);
 };
 }
 else if(typeof(this.canvas)=='string'&&this.canvas.slice(0,4)=='data'){
-let head=this.canvas.indexOf(',')+1;if(head<=0){fail('read:error');};
+let head=this.canvas.indexOf(',')+1;if(head<=0){return reject('read:error');};
 this.length=(this.canvas.length-head)*0.75-(this.canvas.slice(-2).match(/=/g)||[]).length;
-if(this.length<60){fail('read:length');};
+if(this.length<60){return reject('read:length');};
 if(!from||from<0){from=from?(this.length+from):0;};
 if(!till||till<0){till=this.length+(till||0);};
 if(till>this.length){till=this.length;};
-done(this.code(Uint8Array.from(atob(this.canvas.slice(head+Math.floor(from/3)*4,head+Math.ceil(till/3)*4)),c=>c.charCodeAt(0)).buffer.slice(from%3,(till%3||3)-3||this.length)));
+return resolve(this.code(Uint8Array.from(atob(this.canvas.slice(head+Math.floor(from/3)*4,head+Math.ceil(till/3)*4)),c=>c.charCodeAt(0)).buffer.slice(from%3,(till%3||3)-3||this.length)));
 }
-else{fail('read:input');};
+else{return reject('read:input');};
+});
+};
+bath(){
+return new Promise((resolve,reject)=>{
+if(typeof(this.canvas)=='object'&&this.config._dataurl){
+let reader=new FileReader();
+reader.readAsDataURL(this.canvas);
+reader.onerror=()=>{return reject('bath:error');};
+reader.onload=()=>{this.canvas=reader.result;return resolve();};
+}
+else if(typeof(this.canvas)=='string'&&(this.canvas.slice(0,4)=='blob'||!this.config._dataurl)){
+let reader=new XMLHttpRequest;
+reader.responseType='blob';
+reader.onerror=()=>{return reject('bath:error');};
+reader.onload=()=>{
+if(!this.config._dataurl){this.canvas=reader.response;return resolve();};
+let _reader=new FileReader();
+_reader.readAsDataURL(reader.response);
+_reader.onerror=()=>{return reject('bath:error');};
+_reader.onload=()=>{this.canvas=_reader.result;return resolve();};
+};
+reader.open('GET',this.canvas);
+reader.send(null);
+}
+else{return resolve();};
 });
 };
 async init(){
+if(!this.canvas){return Promise.reject('init:canvas');};
 let read=null;
 read=await this.read(0,21);
 if(read.slice(0,16)=='89504e470d0a1a0a'){this.format='png';}
@@ -88,24 +113,38 @@ for(let i=0;i<loop;i++){if(['0112','1201'].indexOf(read.slice(i*24,i*24+4))>=0){
 };
 };
 if(this.format=='gif'&&this.detail=='gif89'){
-console.log('will_scan_animated_gif'); //scan animated gif
+let from=0;
+let find=0;
+while(from>=0&&find<2){
+read=await this.read(from,from+102420);
+if(from+102420>=this.length){from=-1;}else{from+=102400;}
+find+=(read.match(/21f904.{8}00(2c|21)/g)||[]).length;
+};
+if(find>=2){this.animate=true;};
 };
 if(this.reader){delete this.reader;};
 return Promise.resolve(this);
 };
 async conv(){
 await this.init();
-if(!this.config[this.format]){return Promise.resolve(this);};
-return new Promise((done,fail)=>{
+if(!this.config[this.format]){await this.bath();return Promise.resolve(this);};
+let cfg=this.config[this.format].normal?this.config[this.config[this.format].normal]:{};
+if(this.animate&&typeof(this.config[this.format].animate)!='undefined'){
+if(this.config[this.format].animate){cfg=this.config[this.config[this.format].animate];}
+else{await this.bath();return Promise.resolve(this);};
+};
+if(cfg.format=='image/webp'&&typeof(this.config[this.format].nowebp)!='undefined'){
+let cvs=document.createElement('canvas');cvs.getContext('2d');
+if(cvs.toDataURL('image/webp').indexOf('data:image/webp')!=0){
+if(this.config[this.format].nowebp){cfg=this.config[this.config[this.format].nowebp];}
+else{await this.bath();return Promise.resolve(this);};
+};
+};
+return new Promise((resolve,reject)=>{
 let img=new Image();
 img.src=(typeof(this.canvas)=='object')?URL.createObjectURL(this.canvas):this.canvas;
 img.onload=()=>{
 let fix=(typeof(img.style['image-orientation'])=='undefined')?true:(['','from-image'].indexOf(img.style['image-orientation'])<0);
-let cfg=this.config[this.format].normal?this.config[this.config[this.format].normal]:{};
-if(cfg.format=='image/webp'&&this.config[this.format].nowebp){
-let cvs=document.createElement('canvas');cvs.getContext('2d');
-if(cvs.toDataURL('image/webp').indexOf('data:image/webp')!=0){cfg=this.config[this.config[this.format].nowebp];};
-};
 if(typeof(this.canvas)=='object'){URL.revokeObjectURL(img.src);};
 let width=img.width,height=img.height,ratio=width/height,topple=false;
 if(fix&&(this.rotate==6||this.rotate==8)){
@@ -132,13 +171,10 @@ ctx.fillStyle=cfg.fill||'transparent';
 ctx.fillRect(0,0,width,height);
 if(cfg.render){for(let key in cfg.render){ctx[key]=cfg.render[key];};};
 ctx.drawImage(img,0,0,img.width,img.height,0,0,topple?height:width,topple?width:height);
-switch(cfg.output){
-case 'Blob':this.canvas.toBlob((blob)=>{this.canvas=blob;done(this);},cfg.format||'image/webp',cfg.quality||0.9);break;
-case 'DataURL':this.canvas=this.canvas.toDataURL(cfg.format||'image/webp',cfg.quality||0.9);done(this);break;
-default:done(this);break;
+if(this.config._dataurl){this.canvas=this.canvas.toDataURL(cfg.format||'image/png',cfg.quality||0.9);return resolve(this);}
+else{this.canvas.toBlob((blob)=>{this.canvas=blob;return resolve(this);},cfg.format||'image/png',cfg.quality||0.9);};
 };
-};
-img.onerror=()=>{fail('load:image');};
+img.onerror=()=>{return reject('conv:load');};
 });
 };
 };

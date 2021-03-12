@@ -9,15 +9,17 @@
 <script>
 function rape(file){
 let conf={
-to_png:{width:500,height:500,fill:null,format:'image/png',output:'DataURL',quality:0.8}, //,render:{}
-to_jpeg:{width:500,height:500,fill:'#FFF',format:'image/jpeg',output:'DataURL',quality:0.8},
-to_webp:{width:500,height:500,fill:null,format:'image/webp',output:'DataURL',quality:0.8},
-png:{normal:'to_webp',nowebp:'to_jpeg'},
-jpg:{normal:'to_webp',nowebp:'to_jpeg'},
-bmp:{normal:'to_webp',nowebp:'to_jpeg'},
+_cover:'',
+_dataurl:true,
+_jpg:{width:500,height:500,fill:'#FFF',format:'image/jpeg',quality:0.8}, //,render:{}
+_png:{width:500,height:500,fill:null,format:'image/png',quality:0.8},
+_webp:{width:500,height:500,fill:null,format:'image/webp',quality:0.8},
+jpg:{normal:'_webp',nowebp:'_jpg'},
+png:{normal:'_webp',nowebp:'_png'},
+bmp:{normal:'_webp',nowebp:'_jpg'},
 ico:null,
-gif:{normal:'to_webp',nowebp:'to_jpeg',animate:false},
-webp:{normal:'to_webp',nowebp:'to_jpeg',animate:false},
+gif:{normal:'_webp',nowebp:'_jpg'},
+webp:{normal:'_webp',nowebp:'_png',animate:false},
 };
 new Rape(file,conf).conv().then((res)=>{console.log(res);document.getElementById('test').src=res.canvas;}).catch((err)=>{console.log('err:'+err);});
 };
