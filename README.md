@@ -40,7 +40,7 @@ _chop:{url:'tits.png',width:400,height:200,x:0.5,y:-80},
 // width: 原图达到此宽度才添加水印
 // width:(undefined)||null||false 0
 // height: 原图达到此高度才添加水印
-// heiight:(undefined)||null||false 0
+// height:(undefined)||null||false 0
 // x: 顶点横坐标 负数为从右到左 0-1小数为中轴百分比
 // x:(undefined)||null||false 0
 // y: 顶点纵坐标 负数为从下到上 0-1小数为中轴百分比
