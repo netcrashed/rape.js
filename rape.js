@@ -1,4 +1,3 @@
-//github.com/netcrashed/rape.js
 class Rape{
 constructor(file,conf){
 this._='20210313';
@@ -57,6 +56,14 @@ if(till>this.length){till=this.length;};
 return resolve(this.code(Uint8Array.from(atob(this.canvas.slice(head+Math.floor(from/3)*4,head+Math.ceil(till/3)*4)),c=>c.charCodeAt(0)).buffer.slice(from%3,(till%3||3)-3||this.length)));
 }
 else{return reject('read:input');};
+});
+};
+load(item){
+return new Promise((resolve,reject)=>{
+let loader=new Image();
+loader.src=(typeof(item)=='object')?URL.createObjectURL(item):item;
+loader.onload=()=>{return resolve(loader);};
+loader.onerror=()=>{return reject('load:error');};
 });
 };
 bath(){
@@ -135,41 +142,38 @@ if(this.config[this.format].nowebp){cfg=this.config[this.config[this.format].now
 else{await this.bath();return Promise.resolve(this);};
 };
 };
-return new Promise((resolve,reject)=>{
-let img=new Image();
-img.src=(typeof(this.canvas)=='object')?URL.createObjectURL(this.canvas):this.canvas;
-img.onload=()=>{
+let img=await this.load(this.canvas);
 let fix=(typeof(img.style['image-orientation'])=='undefined')?true:(['','from-image'].indexOf(img.style['image-orientation'])<0);
 if(typeof(this.canvas)=='object'){URL.revokeObjectURL(img.src);};
-let width=img.width,height=img.height,ratio=width/height,topple=false;
+let w=img.width,h=img.height,r=w/h,swap=false;
 if(fix&&(this.rotate==6||this.rotate==8)){
-width=img.height;height=img.width;ratio=width/height;topple=true;
+w=img.height;h=img.width;r=w/h;swap=true;
 };
-if(cfg.width&&width>cfg.width&&cfg.height&&height>cfg.height){
-if(cfg.height>cfg.width/ratio){width=cfg.width;height=width/ratio;}
-else{height=cfg.height;width=height*ratio;};
-}
-else if(cfg.width&&width>cfg.width){width=cfg.width;height=Math.round(width/ratio);}
-else if(cfg.height&&height>cfg.height){height=cfg.height;width=Math.round(height*ratio);};
+if(cfg.width&&w>cfg.width&&cfg.height&&h>cfg.height){if(cfg.height>cfg.width/r){w=cfg.width;h=w/r;}else{h=cfg.height;w=h*r;};}
+else if(cfg.width&&w>cfg.width){w=cfg.width;h=Math.round(w/r);}
+else if(cfg.height&&h>cfg.height){h=cfg.height;w=Math.round(h*r);};
 this.canvas=document.createElement('canvas');
-this.canvas.width=width;
-this.canvas.height=height;
+this.canvas.width=w;
+this.canvas.height=h;
 let ctx=this.canvas.getContext('2d');
 if(fix){
 switch(this.rotate){
-case 3:ctx.translate(width,height);ctx.rotate(Math.PI);break;
-case 6:ctx.translate(width,0);ctx.rotate(Math.PI/2);break;
-case 8:ctx.translate(0,height);ctx.rotate(Math.PI/-2);break;
+case 3:ctx.translate(w,h);ctx.rotate(Math.PI);break;
+case 6:ctx.translate(w,0);ctx.rotate(Math.PI/2);break;
+case 8:ctx.translate(0,h);ctx.rotate(Math.PI/-2);break;
 };
 };
 ctx.fillStyle=cfg.fill||'transparent';
-ctx.fillRect(0,0,width,height);
+ctx.fillRect(0,0,w,h);
 if(cfg.render){for(let key in cfg.render){ctx[key]=cfg.render[key];};};
-ctx.drawImage(img,0,0,img.width,img.height,0,0,topple?height:width,topple?width:height);
-if(this.config._dataurl){this.canvas=this.canvas.toDataURL(cfg.format||'image/png',cfg.quality||0.9);return resolve(this);}
-else{this.canvas.toBlob((blob)=>{this.canvas=blob;return resolve(this);},cfg.format||'image/png',cfg.quality||0.9);};
+ctx.drawImage(img,0,0,img.width,img.height,0,0,swap?h:w,swap?w:h);
+if(this.config._chop&&this.config._chop.url){
+let wmk=await this.load(this.config._chop.url),width=this.config._chop.width||0,height=this.config._chop.height||0,x=this.config._chop.x||0,y=this.config._chop.y||0;
+if(x>0&&x<1){x=w*x-wmk.width/2;};
+if(y>0&&y<1){y=h*y-wmk.height/2;};
+if(w>=width&&h>=height){ctx.drawImage(wmk,0,0,wmk.width,wmk.height,(x<0)?(w+x):x,(y<0)?(h+y):y,wmk.width,wmk.height);};
 };
-img.onerror=()=>{return reject('conv:load');};
-});
+if(this.config._dataurl){this.canvas=this.canvas.toDataURL(cfg.format||'image/png',cfg.quality||0.9);return Promise.resolve(this);}
+else{this.canvas.toBlob((blob)=>{this.canvas=blob;return Promise.resolve(this);},cfg.format||'image/png',cfg.quality||0.9);};
 };
 };
