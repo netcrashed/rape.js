@@ -1,6 +1,6 @@
 class Rape{
 constructor(file,conf){
-this._='20210313';
+this._='20210315';
 this.canvas=file||null;
 this.config=conf||{};
 console.log('//github.com/netcrashed/rape.js?'+this._);
@@ -146,9 +146,7 @@ let img=await this.load(this.canvas);
 let fix=(typeof(img.style['image-orientation'])=='undefined')?true:(['','from-image'].indexOf(img.style['image-orientation'])<0);
 if(typeof(this.canvas)=='object'){URL.revokeObjectURL(img.src);};
 let w=img.width,h=img.height,r=w/h,swap=false;
-if(fix&&(this.rotate==6||this.rotate==8)){
-w=img.height;h=img.width;r=w/h;swap=true;
-};
+if(fix&&(this.rotate==6||this.rotate==8)){w=img.height;h=img.width;r=w/h;swap=true;};
 if(cfg.width&&w>cfg.width&&cfg.height&&h>cfg.height){if(cfg.height>cfg.width/r){w=cfg.width;h=w/r;}else{h=cfg.height;w=h*r;};}
 else if(cfg.width&&w>cfg.width){w=cfg.width;h=Math.round(w/r);}
 else if(cfg.height&&h>cfg.height){h=cfg.height;w=Math.round(h*r);};
@@ -174,6 +172,9 @@ if(y>0&&y<1){y=h*y-wmk.height/2;};
 if(w>=width&&h>=height){ctx.drawImage(wmk,0,0,wmk.width,wmk.height,(x<0)?(w+x):x,(y<0)?(h+y):y,wmk.width,wmk.height);};
 };
 if(this.config._dataurl){this.canvas=this.canvas.toDataURL(cfg.format||'image/png',cfg.quality||0.9);return Promise.resolve(this);}
-else{this.canvas.toBlob((blob)=>{this.canvas=blob;return Promise.resolve(this);},cfg.format||'image/png',cfg.quality||0.9);};
+else{
+this.canvas=await new Promise((resolve,reject)=>{this.canvas.toBlob(function(blob){resolve(blob);},cfg.format||'image/png',cfg.quality||0.9);});
+return Promise.resolve(this);
+};
 };
 };
